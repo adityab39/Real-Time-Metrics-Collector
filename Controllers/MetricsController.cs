@@ -38,5 +38,37 @@ namespace RealTimeMetricsApi.Controllers
 
             return Ok(metrics);
         }
+
+        [HttpGet("stats")]
+        public IActionResult GetStats(
+            [FromQuery] string appId,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate)
+        {
+            if (string.IsNullOrWhiteSpace(appId))
+                return BadRequest("The 'appId' query parameter is required.");
+
+            var stats = _service.GetStats(appId, startDate, endDate);
+            if (stats is null)
+                return NotFound("No metrics found for the given parameters.");
+
+            return Ok(stats);
+        }
+
+        [HttpGet("export")]
+        public IActionResult ExportMetrics(
+            [FromQuery] string appId,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate)
+        {
+            if (string.IsNullOrWhiteSpace(appId))
+                return BadRequest("The 'appId' query parameter is required.");
+
+            var csvBytes = _service.ExportMetricsToCsv(appId, startDate, endDate);
+            if (csvBytes == null || csvBytes.Length == 0)
+                return NotFound("No data to export.");
+
+            return File(csvBytes, "text/csv", $"{appId}_metrics.csv");
+        }
     }
 }
