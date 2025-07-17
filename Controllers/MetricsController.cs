@@ -23,15 +23,18 @@ namespace RealTimeMetricsApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetMetricsByAppId([FromQuery] string appId)
+        public IActionResult GetMetrics(
+        [FromQuery] string appId,
+        [FromQuery] DateTime? startDate,
+        [FromQuery] DateTime? endDate)
         {
             if (string.IsNullOrWhiteSpace(appId))
                 return BadRequest("The 'appId' query parameter is required.");
 
-            var metrics = _service.GetMetricsByAppId(appId);
+            var metrics = _service.GetMetrics(appId, startDate, endDate);
 
             if (metrics.Count == 0)
-                return NotFound($"No metrics found for appId: {appId}");
+                return NotFound("No metrics found for given parameters.");
 
             return Ok(metrics);
         }

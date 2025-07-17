@@ -29,10 +29,20 @@ namespace RealTimeMetricsApi.Services
             return metric;
         }
 
-        public List<Metric> GetMetricsByAppId(string appId)
+        public List<Metric> GetMetrics(string appId, DateTime? startDate, DateTime? endDate)
         {
-            return _context.Metrics
-                .Where(m => m.AppId == appId)
+            var query = _context.Metrics.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(appId))
+                query = query.Where(m => m.AppId == appId);
+
+            if (startDate.HasValue)
+                query = query.Where(m => m.Timestamp >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(m => m.Timestamp <= endDate.Value);
+
+            return query
                 .OrderByDescending(m => m.Timestamp)
                 .ToList();
         }
